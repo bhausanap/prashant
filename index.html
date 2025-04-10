@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>हवामान अंदाज</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to top right, #fceabb, #f8b500);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      animation: gradientMove 10s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 3rem 2rem;
+      border-radius: 25px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      transition: all 0.3s ease-in-out;
+      backdrop-filter: blur(10px);
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2.8rem;
+      color: #333;
+      margin-bottom: 1.5rem;
+      animation: fadeIn 1s ease 0.2s both;
+    }
+
+    input {
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 15px;
+      font-size: 1.1rem;
+      width: 100%;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      background: linear-gradient(to right, #ff512f, #dd2476);
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(to right, #dd2476, #ff512f);
+    }
+
+    .weather {
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      color: #444;
+      background-color: #fff6e5;
+      padding: 1.5rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease 0.3s both;
+    }
+
+    .weather img {
+      width: 90px;
+      height: 90px;
+      margin: 1rem 0;
+    }
+
+    .weather p {
+      margin: 0.5rem 0;
+    }
+
+    .me{
+        background-color: black;
+        color: white;
+        border-radius: 50px;
+        width: 25px
+        justify-content: center;
+    }
+    p{
+        font-weight: 900;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>हवामान अंदाज </h1>
+    <input type="text" id="city" placeholder="शहराचे नाव प्रविष्ट करा">
+    <div class="buttons">
+      <button onclick="getWeather()">हवामान बघा </button>
+      <button onclick="clearWeather()">रद्द  करा</button>
+    </div>
+    <p class="me">❤️ Made By:भाऊसाहेब सानप ❤️</p>
+    <div class="weather" id="weather"></div>
+  </div>
+
+  <script>
+    const apiKey = 'acdcafe2508249f1b8b125137251004';
+
+    const marathiToEnglishMap = {
+      'मुंबई': 'Mumbai',
+      'पुणे': 'Pune',
+      'नाशिक': 'Nashik',
+      'नागपूर': 'Nagpur',
+      'औरंगाबाद': 'Aurangabad',
+      'सातारा': 'Satara',
+      'सांगली': 'Sangli',
+      'कोल्हापूर': 'Kolhapur',
+      'ठाणे': 'Thane'
+    };
+
+    const conditionTranslations = {
+      'Sunny': 'सूर्यप्रकाश',
+      'Partly cloudy': 'अंशतः ढगाळ',
+      'Cloudy': 'ढगाळ',
+      'Overcast': 'पूर्ण ढगाळ',
+      'Mist': 'धुके',
+      'Patchy rain possible': 'थोडा पाऊस शक्य',
+      'Light rain': 'हलका पाऊस',
+      'Heavy rain': 'जोरदार पाऊस',
+      'Thunderstorm': 'विजांसह वादळ',
+      'Clear': 'स्वच्छ',
+      'Fog': 'धुके',
+      'Snow': 'हिमवर्षाव'
+    };
+
+    async function getWeather() {
+      let city = document.getElementById('city').value.trim();
+      const weatherDiv = document.getElementById('weather');
+
+      if (!city) {
+        weatherDiv.innerHTML = 'कृपया शहराचे नाव प्रविष्ट करा.';
+        return;
+      }
+
+      if (marathiToEnglishMap[city]) {
+        city = marathiToEnglishMap[city];
+      }
+
+      const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${city}&days=1`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.error) {
+          weatherDiv.innerHTML = `<p>त्रुटी: ${data.error.message}</p>`;
+        } else {
+          const temp = data.current.temp_c;
+          const condition = data.current.condition.text;
+          const iconUrl = data.current.condition.icon;
+          const wind_kph = data.current.wind_kph;
+          const wind_dir = data.current.wind_dir;
+          const pressure = data.current.pressure_mb;
+          const humidity = data.current.humidity;
+          const uv = data.current.uv;
+          const sunrise = data.forecast.forecastday[0].astro.sunrise;
+          const sunset = data.forecast.forecastday[0].astro.sunset;
+
+          const marathiCondition = conditionTranslations[condition] || condition;
+
+          weatherDiv.innerHTML = `
+            <p><strong>${data.location.name}, ${data.location.country}</strong></p>
+            <img src="${iconUrl}" alt="हवामान चिन्ह">
+            <p>${marathiCondition}</p>
+            <p><strong>${temp}&deg;C</strong></p>
+            <p>वाऱ्याचा वेग: ${wind_kph} किमी/तास</p>
+            <p>वाऱ्याची दिशा: ${wind_dir}</p>
+            <p>दाब: ${pressure} mb</p>
+            <p>आर्द्रता: ${humidity}%</p>
+            <p>UV निर्देशांक: ${uv}</p>
+            <p>सूर्योदय: ${sunrise}</p>
+            <p>सूर्यास्त: ${sunset}</p>
+          `;
+        }
+      } catch (error) {
+        weatherDiv.innerHTML = '<p>हवामान मिळवताना त्रुटी आली.</p>';
+      }
+    }
+
+    function clearWeather() {
+      document.getElementById('city').value = '';
+      document.getElementById('weather').innerHTML = '';
+    }
+  </script>
+</body>
+</html>
