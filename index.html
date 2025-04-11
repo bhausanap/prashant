@@ -188,6 +188,7 @@
           const iconUrl = data.current.condition.icon;
           const wind_kph = data.current.wind_kph;
           const wind_dir = data.current.wind_dir;
+           const precip = data.current.precip_mm;
           const pressure = data.current.pressure_mb;
           const humidity = data.current.humidity;
           const uv = data.current.uv;
@@ -203,6 +204,7 @@
             <p><strong>${temp}&deg;C</strong></p>
             <p>वाऱ्याचा वेग: ${wind_kph} किमी/तास</p>
             <p>वाऱ्याची दिशा: ${wind_dir}</p>
+             <p>पर्जन्यमान: ${precip} मिमी</p>
             <p>दाब: ${pressure} mb</p>
             <p>आर्द्रता: ${humidity}%</p>
             <p>UV निर्देशांक: ${uv}</p>
